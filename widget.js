@@ -64,32 +64,44 @@ rivets.binders.widget = {
     this.widget.uninstall()
   },
 
-  routine: function(el, widgetFactory) {
-    var widget = widgetFactory()
-    if (this.widget) return
+  routine: function(el) {
 
-    widget.on('change:running', function() {
-      if (!widget.get('running')) return this.unbind(el)
+    var run = function(el, widgetObj) {
+      var widget = widgetObj.factory()
+      if (this.widget) return
 
-      widget.ensureFragment(function(frag) {
-        el.innerHTML = ''
-        el.appendChild(frag.cloneNode(true))
+      var bind = function() {
+        widget.ensureFragment(function(frag) {
+          el.innerHTML = ''
+          el.appendChild(frag.cloneNode(true))
 
-        var models = _.extend({}, this.view.models, { widget: widget })
-        var options = {
-          binders: this.view.binders,
-          formatters: this.view.formatters,
-          adapters: this.view.adapters,
-          config: this.view.config
-        }
+          var models = _.extend({}, this.view.models, { widget: widget })
+          var options = {
+            binders: this.view.binders,
+            formatters: this.view.formatters,
+            adapters: this.view.adapters,
+            config: this.view.config
+          }
 
-        widget.view = rivets.bind(el, models, options)
-        this.marker.parentNode.insertBefore(el, this.marker.nextSibling)
-      }.bind(this))
-    }, this)
+          widget.view = rivets.bind(el, models, options)
+          this.marker.parentNode.insertBefore(el, this.marker.nextSibling)
+        }.bind(this))
+      }.bind(this)
 
-    this.widget = widget
-    widget.install(el)
+      widget.on('change:running', function() {
+        if (!widget.get('running')) return this.unbind(el)
+        bind()
+      }, this)
+
+      if (widget.get('running')) bind()
+
+      this.widget = widget
+      widget.install(el)
+    }.bind(this)
+
+    var name = el.getAttribute('data-widget-name')
+    if (!name) return
+    hub.trigger('widget:needed', name, run.bind(this, el))
   }
 }
 
@@ -182,14 +194,32 @@ var Widget = Backbone.Model.extend({
 })
 
 // factory + API
-module.exports = function(fn) {
-  var Factory = Widget.extend({ 
+module.exports = function(name, fn) {
+
+  var anon = !fn
+
+  if (anon) fn = name
+
+  var SubWidget = Widget.extend({ 
     initialize: function() {
       fn.call(this, hub)
     }
   })
-  return function() { return new Factory }
+
+  var factory = function() { return new SubWidget() }
+
+  if (!anon) {
+    hub.trigger('widget:defined', { name: name, factory: factory })
+  }
+
+  return factory
 }
+
+// store widgets
+var registery = {}
+hub.on('widget:defined', function(obj) { registery[obj.name] = obj })
+hub.on('widget:needed', function(name, cb) { cb(registery[name]) })
 
 module.exports.Widget = Widget
 module.exports.hub = hub
+
