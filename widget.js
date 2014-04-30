@@ -155,7 +155,7 @@ var Widget = Backbone.Model.extend({
   }),
 
   assets: fluent(function(arr, cb) {
-    toast.apply(toast, arr.concat(cb))
+    toast.apply(null, arr.concat(cb))
   }),
 
   start: fluent(function() {
