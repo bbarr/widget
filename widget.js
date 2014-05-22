@@ -3,7 +3,6 @@ var _ = require('lodash')
 var Backbone = require('backbone')
 var rivets = require('rivets')
 var $ = require('jquery')
-var toast = require('toast')
 
 // this is the event hub that all modules will have access to
 var hub = _.extend({}, Backbone.Events)
@@ -155,7 +154,7 @@ var Widget = Backbone.Model.extend({
   }),
 
   assets: fluent(function(arr, cb) {
-    toast.apply(null, arr.concat(cb))
+    cb()
   }),
 
   start: fluent(function() {
