@@ -2,7 +2,6 @@
 var _ = require('lodash')
 var Backbone = require('backbone')
 var rivets = require('rivets')
-var $ = require('jquery')
 
 // this is the event hub that all modules will have access to
 var hub = _.extend({}, Backbone.Events)
@@ -12,28 +11,10 @@ function argsAsArray(args) {
   return _.flatten(_.toArray(args))
 }
 
-function notAlreadyLoaded(url) {
-  return !_.any($('script, link').toArray(), function(el) { 
-    return el.getAttribute('src') == url || el.getAttribute('href') == url
-  })
-}
-
 function fluent(fn) {
   return function() {
     fn.apply(this, arguments)
     return this
-  }
-}
-
-// Properly handle scripts trying to be loaded by document.write()
-if (document && document.write) {
-  var docWrite = document.write
-  document.write = function(content) {
-    if (content.indexOf('script') == 1) {
-      Widget.prototype.assets(['//' + content.split('://')[1].split('.js')[0] + '.js'])
-    } else {
-      console.log('SOMEONE tried to document.write something that wasnt a script... wtf?')
-    }
   }
 }
 

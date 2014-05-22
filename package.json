@@ -1,6 +1,6 @@
 {
   "name": "widget",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "",
   "main": "widget.js",
   "scripts": {
@@ -14,6 +14,11 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/bbarr/widget/issues"
+  },
+  "dependencies": {
+    "backbone": "*",
+    "lodash": "*",
+    "rivets": "*"
   },
   "homepage": "https://github.com/bbarr/widget"
 }
