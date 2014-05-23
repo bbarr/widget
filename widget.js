@@ -19,7 +19,7 @@ function fluent(fn) {
 }
 
 // add widget binder to rivets.js
-rivets.binders.widget = {
+rivets.binders['widget-*'] = {
 
   'function': true,
 
@@ -79,7 +79,7 @@ rivets.binders.widget = {
       widget.install(el)
     }.bind(this)
 
-    var name = el.getAttribute('data-widget-name')
+    var name = this.args[0]
     if (!name) return
     hub.trigger('widget:needed', name, run.bind(this, el))
   }
@@ -126,12 +126,8 @@ var Widget = Backbone.Model.extend({
   },
 
   template: fluent(function(url) {
-    $.ajax({
-      type: 'GET',
-      accept: 'text/html',
-      url: url,
-      success: this.set.bind(this, 'html')
-    })
+    var temp = document.getElementById(url)
+    this.set('html', temp.innerHTML)
   }),
 
   assets: fluent(function(arr, cb) {
@@ -202,4 +198,5 @@ hub.on('widget:needed', function(name, cb) { cb(registery[name]) })
 
 module.exports.Widget = Widget
 module.exports.hub = hub
+
 
