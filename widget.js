@@ -73,7 +73,7 @@ rivets.binders['widget-*'] = {
           }
 
           var $partial = $('[data-partial]')
-          if ($partial) {
+          if ($partial.length) {
             var cb
             if ($partial.length > 1) {
               cb = _.after($partial.length - 1, finish)
