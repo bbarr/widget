@@ -2,6 +2,7 @@
 var _ = require('lodash')
 var Backbone = require('backbone')
 var rivets = require('rivets')
+var $ = require('jquery')
 
 // this is the event hub that all modules will have access to
 var hub = _.extend({}, Backbone.Events)
@@ -46,12 +47,15 @@ rivets.binders['widget-*'] = {
 
   routine: function(el) {
 
+    var self = this
+
     var run = function(el, widgetObj) {
       var widget = widgetObj.factory()
       if (this.widget) return
 
       var bind = function() {
         widget.ensureFragment(function(frag) {
+
           el.innerHTML = ''
           el.appendChild(frag.cloneNode(true))
 
@@ -63,8 +67,25 @@ rivets.binders['widget-*'] = {
             config: this.view.config
           }
 
-          widget.view = rivets.bind(el, models, options)
-          this.marker.parentNode.insertBefore(el, this.marker.nextSibling)
+          var finish = function() {
+            widget.view = rivets.bind(el, models, options)
+            self.marker.parentNode.insertBefore(el, self.marker.nextSibling)
+          }
+
+          var $partial = $('[data-partial]')
+          if ($partial) {
+            var cb
+            if ($partial.length > 1) {
+              cb = _.after($partial.length - 1, finish)
+            } else cb = finish
+            _.each($partial.map(function(i, el) { return el.getAttribute('data-partial') }), function(url, i) {
+              $.get(url, function(html) {
+                $($partial[i]).replaceWith(html)
+                cb()
+              })
+            })
+          } else finish()
+
         }.bind(this))
       }.bind(this)
 
@@ -198,5 +219,6 @@ hub.on('widget:needed', function(name, cb) { cb(registery[name]) })
 
 module.exports.Widget = Widget
 module.exports.hub = hub
+
 
 
