@@ -72,7 +72,7 @@ rivets.binders['widget-*'] = {
             self.marker.parentNode.insertBefore(el, self.marker.nextSibling)
           }
 
-          var $partial = $('[data-partial]')
+          var $partial = $('[data-partial]', el)
           if ($partial.length) {
             var cb
             if ($partial.length > 1) {
